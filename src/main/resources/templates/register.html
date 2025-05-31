@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFCritica - Cadastro</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Reutilize e adapte os estilos do login-container ou crie um novo */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .register-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 350px; /* Um pouco mais largo que o login */
+            text-align: center;
+        }
+        .register-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-register {
+            background-color: #28a745; /* Verde para registro */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .btn-register:hover {
+            background-color: #218838;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .login-link {
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>UFCritica - Cadastro</h2>
+
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+
+        <form th:action="@{/register}" method="post" th:object="${user}">
+            <div class="form-group">
+                <label for="name">Nome:</label>
+                <input type="text" id="name" th:field="*{name}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" th:field="*{email}" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" th:field="*{password}" required>
+            </div>
+            <button type="submit" class="btn-register">Cadastrar</button>
+        </form>
+
+        <p class="login-link">
+            Já tem uma conta? <a th:href="@{/login}">Faça login aqui</a>.
+        </p>
+    </div>
+</body>
+</html>

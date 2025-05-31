@@ -1,0 +1,62 @@
+package com.ufcritica.ufcritica.controller;
+
+import com.ufcritica.ufcritica.model.User; // Supondo que sua classe User representa o usuário para login
+import com.ufcritica.ufcritica.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model; // Importar para passar dados para o Thymeleaf
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping // Opcional, se você quiser um prefixo como "/auth" para todos os métodos aqui
+public class AuthController {
+
+    @Autowired
+    private UserService userService; // Você já tem este serviço
+
+    // GET para exibir a página de login
+    @GetMapping("/login")
+    public String showLoginForm(Model model) {
+        // Adiciona um objeto User vazio ao modelo para o formulário Thymeleaf
+        // Isso é crucial para o th:object e th:field funcionarem
+        model.addAttribute("user", new User());
+        return "login"; // Irá procurar por login.html em src/main/resources/templates
+    }
+
+    // POST para processar o formulário de login
+    @PostMapping("/login")
+    public String processLogin(@ModelAttribute("user") User user, Model model) {
+        // Lógica de autenticação
+        // Aqui você chamaria seu UserService para verificar as credenciais
+        if (userService.authenticate(user.getEmail(), user.getPassword())) { // Supondo que UserService.authenticate exista
+            // Login bem-sucedido: Redirecione para a página inicial ou um dashboard
+            return "redirect:/"; // Redireciona para a home (definida em HomeController.java, por exemplo)
+        } else {
+            // Login falhou: Adiciona uma mensagem de erro ao modelo e retorna para a página de login
+            model.addAttribute("error", "Email ou senha inválidos.");
+            return "login";
+        }
+    }
+
+    // GET para exibir a página de registro (se ainda não tiver uma)
+    @GetMapping("/register")
+    public String showRegistrationForm(Model model) {
+        model.addAttribute("user", new User());
+        return "register"; // Irá procurar por register.html
+    }
+
+    // POST para processar o formulário de registro
+    @PostMapping("/register")
+    public String processRegistration(@ModelAttribute("user") User user, Model model) {
+        try {
+            userService.registerNewUser(user); // Supondo que UserService.registerNewUser exista
+            return "redirect:/login?registered"; // Redireciona para login com um parâmetro para indicar sucesso
+        } catch (Exception e) { // Capturar exceções como email já existente
+            model.addAttribute("error", "Erro ao registrar: " + e.getMessage());
+            return "register";
+        }
+    }
+}
