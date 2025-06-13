@@ -16,7 +16,7 @@ public class User {
     private String email; // Campo para o email
     private String password; // Campo para a senha
 
-    // Construtores (opcional, mas bom ter um padrão e um com campos)
+
     public User() {}
 
     public User(String name, String email, String password) {
