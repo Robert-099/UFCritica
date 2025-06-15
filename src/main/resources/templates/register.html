@@ -6,7 +6,6 @@
     <title>UFCritica - Cadastro</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* Reutilize e adapte os estilos do login-container ou crie um novo */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -21,7 +20,7 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 350px; /* Um pouco mais largo que o login */
+            width: 380px; /* Um pouco mais largo para acomodar os novos campos */
             text-align: center;
         }
         .register-container h2 {
@@ -39,7 +38,8 @@
         }
         .form-group input[type="text"],
         .form-group input[type="email"],
-        .form-group input[type="password"] {
+        .form-group input[type="password"],
+        .form-group input[type="date"] { /* Adicionado input type date */
             width: calc(100% - 20px);
             padding: 10px;
             border: 1px solid #ddd;
@@ -55,6 +55,7 @@
             cursor: pointer;
             font-size: 16px;
             width: 100%;
+            margin-top: 10px; /* Espaço para a mensagem de erro da senha */
         }
         .btn-register:hover {
             background-color: #218838;
@@ -83,18 +84,35 @@
 
         <div th:if="${error}" class="error-message" th:text="${error}"></div>
 
-        <form th:action="@{/register}" method="post" th:object="${user}">
+        <form th:action="@{/register}" method="post" th:object="${user}" onsubmit="return validateForm()">
             <div class="form-group">
-                <label for="name">Nome:</label>
-                <input type="text" id="name" th:field="*{name}" required>
+                <label for="fullName">Nome Completo:</label>
+                <input type="text" id="fullName" name="fullName" th:field="*{fullName}" required>
+            </div>
+            <div class="form-group">
+                <label for="birthDate">Data de Nascimento:</label>
+                <input type="date" id="birthDate" name="birthDate" th:field="*{birthDate}" required>
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" th:field="*{email}" required>
+                <input type="email" id="email" name="email" th:field="*{email}" required>
+            </div>
+            <div class="form-group">
+                <label for="city">Cidade:</label>
+                <input type="text" id="city" name="city" th:field="*{city}" required>
+            </div>
+            <div class="form-group">
+                <label for="state">Estado:</label>
+                <input type="text" id="state" name="state" th:field="*{state}" required>
             </div>
             <div class="form-group">
                 <label for="password">Senha:</label>
-                <input type="password" id="password" th:field="*{password}" required>
+                <input type="password" id="password" name="password" th:field="*{password}" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirmar Senha:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <small id="passwordMatchError" class="error-message" style="display:none;">As senhas não coincidem.</small>
             </div>
             <button type="submit" class="btn-register">Cadastrar</button>
         </form>
@@ -103,5 +121,21 @@
             Já tem uma conta? <a th:href="@{/login}">Faça login aqui</a>.
         </p>
     </div>
+
+    <script>
+        function validateForm() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const passwordMatchError = document.getElementById('passwordMatchError');
+
+            if (password !== confirmPassword) {
+                passwordMatchError.style.display = 'block'; // Mostra a mensagem de erro
+                return false; // Impede o envio do formulário
+            } else {
+                passwordMatchError.style.display = 'none'; // Esconde a mensagem se estiver tudo ok
+                return true; // Permite o envio do formulário
+            }
+        }
+    </script>
 </body>
 </html>

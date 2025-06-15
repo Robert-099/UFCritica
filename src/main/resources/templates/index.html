@@ -1,11 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Bem-vindo ao UFcríticas - Usabilidade Divertida!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative; /* FUNDAMENTAL: Para que o botão se posicione em relação a este contêiner */
+            overflow: hidden; /* Opcional, para esconder o botão se ele sair das bordas */
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            margin-top: 30px;
+            min-height: 50px; /* Ajuste este valor se o botão sumir para baixo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            /* Transição para cor e para o movimento */
+            transition: background-color 0.3s ease, transform 0.2s ease-out; /* AQUI ESTÁ A MUDANÇA PRINCIPAL */
+        }
+        .button.login {
+            background-color: #3498db;
+            color: white;
+        }
+        .button.login:hover {
+            background-color: #2980b9;
+        }
+        /* Estilos específicos para o botão de registro que vai se mover */
+        .button.register {
+            background-color: #2ecc71;
+            color: white;
+            position: relative; /* Permite o posicionamento e transformação */
+            left: 0;
+            top: 0;
+            z-index: 10;
+        }
+        .button.register:hover {
+            background-color: #27ae60;
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="container">
+        <h1>Bem-vindo ao UFcríticas!</h1>
+        <p>Seu espaço para análises e opiniões sobre o universo universitário.</p>
+        <div class="buttons">
+            <a href="login.html" class="button login">Entrar</a>
+            <a href="register.html" id="registerButton" class="button register">Registrar</a>
+        </div>
+    </div>
+
+    <script>
+        const registerButton = document.getElementById('registerButton');
+        let hasMoved = false; // Flag para garantir que se mova apenas uma vez por "mouseover"
+
+        registerButton.addEventListener('mouseover', function() {
+            if (!hasMoved) {
+                const container = registerButton.closest('.container'); // Pega o container pai
+                const containerRect = container.getBoundingClientRect();
+                const buttonRect = registerButton.getBoundingClientRect();
+
+                // Calcula o espaço disponível para o movimento dentro do container
+                // Subtrai o tamanho do próprio botão para não sair da área
+                const maxX = containerRect.width - buttonRect.width - (parseFloat(getComputedStyle(container).paddingLeft) + parseFloat(getComputedStyle(container).paddingRight));
+                const maxY = containerRect.height - buttonRect.height - (parseFloat(getComputedStyle(container).paddingTop) + parseFloat(getComputedStyle(container).paddingBottom));
+
+                // Gera posições aleatórias dentro do contêiner
+                const newX = Math.random() * maxX;
+                const newY = Math.random() * maxY;
+
+                // Aplica a nova posição. Usamos transform para melhor performance
+                
+                registerButton.style.position = 'absolute'; // Mudar para absoluto para mover livremente
+                registerButton.style.left = `${newX}px`;
+                registerButton.style.top = `${newY}px`;
+
+                hasMoved = true;
+            }
+        });
+
+        // Resetar a flag quando o mouse sai do botão para que ele possa se mover novamente
+        registerButton.addEventListener('mouseout', function() {
+            hasMoved = false;
+        });
+
+       
+    </script>
 </body>
 </html>
