@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Saudação</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="alert alert-success">
+            Olá, <span th:text="${nome}">Visitante</span>!
+        </div>
+        <a href="/" class="btn btn-primary">Voltar</a>
+    </div>
+    <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

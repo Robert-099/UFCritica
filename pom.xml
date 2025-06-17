@@ -71,6 +71,18 @@
     <artifactId>sqlite-jdbc</artifactId>
     <version>3.45.0.0</version> </dependency>
 	</dependencies>
+		<!-- Para testes -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-test</artifactId>
+		<scope>test</scope>
+	</dependency>
+
+	<!-- Para tratamento de validação -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-validation</artifactId>
+	</dependency>
 
 	<build>
 		<plugins>
