@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFCritica - Adicionar Crítica</title>
+    <style>
+        /* Estilos base do corpo da página */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Estilos do contêiner principal do formulário */
+        .critica-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 550px; /* Mais largo para acomodar a busca de API */
+            text-align: center;
+        }
+
+        /* Estilos do título */
+        .critica-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Estilos dos grupos de formulário (label + input) */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        /* Estilos dos campos de input, select e textarea */
+        .form-group input[type="text"],
+        .form-group select,
+        .form-group textarea {
+            width: calc(100% - 20px); /* Largura total menos padding */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Garante que padding não aumente a largura total */
+            resize: vertical; /* Permite redimensionar verticalmente o textarea */
+        }
+        .form-group textarea {
+            min-height: 120px; /* Altura mínima para o campo de texto da crítica */
+        }
+
+        /* Estilos do botão de envio da crítica */
+        .btn-submit-critica {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-submit-critica:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilos do link para voltar */
+        .back-link {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Estilos para a área de busca da API (TMDb) --- */
+        .api-search-section {
+            background-color: #e9ecef; /* Cor de fundo para a seção de busca */
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .api-search-section .search-input-group {
+            display: flex; /* Para alinhar o input de busca e o botão lado a lado */
+            gap: 10px; /* Espaçamento entre o input e o botão */
+            margin-bottom: 10px;
+        }
+        .api-search-section .search-input-group input {
+            flex-grow: 1; /* Faz o input ocupar o espaço disponível */
+            margin-bottom: 0; /* Anula margem inferior padrão do form-group */
+        }
+        .api-search-section .search-results {
+            max-height: 250px; /* Altura máxima para a área de resultados */
+            overflow-y: auto; /* Adiciona scroll se os resultados excederem a altura */
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .api-search-section .search-result-item {
+            display: flex; /* Para alinhar imagem e detalhes do resultado */
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer; /* Indica que o item é clicável */
+            transition: background-color 0.2s;
+        }
+        .api-search-section .search-result-item:last-child {
+            border-bottom: none; /* Remove a borda do último item */
+        }
+        .api-search-section .search-result-item:hover {
+            background-color: #e2e6ea; /* Efeito hover nos itens de resultado */
+        }
+        .api-search-section .search-result-item img {
+            width: 50px;
+            height: 75px; /* Proporção de pôster comum (2:3) */
+            object-fit: cover; /* Garante que a imagem preencha o espaço sem distorção */
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        .api-search-section .search-result-item .details {
+            flex-grow: 1; /* Faz os detalhes ocuparem o espaço restante */
+        }
+        .api-search-section .search-result-item .details h4 {
+            margin: 0;
+            font-size: 1em;
+            color: #333;
+        }
+        .api-search-section .search-result-item .details p {
+            margin: 0;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="critica-container">
+        <h2>Adicionar Nova Crítica</h2>
+
+        <div th:if="${successMessage}" style="color: green; margin-bottom: 15px;" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" style="color: red; margin-bottom: 15px;" th:text="${errorMessage}"></div>
+
+        <div class="api-search-section">
+            <label for="apiSearchInput">Buscar Filme/Série:</label>
+            <div class="search-input-group">
+                <input type="text" id="apiSearchInput" placeholder="Ex: Oppenheimer, Stranger Things">
+                <button type="button" id="searchApiBtn" class="btn-submit-critica" style="width: auto;">Buscar</button>
+            </div>
+            <div id="searchResults" class="search-results">
+                </div>
+        </div>
+        <form th:action="@{/add-critica}" method="post" th:object="${critica}">
+            <div class="form-group">
+                <label for="titulo">Título da Crítica:</label>
+                <input type="text" id="titulo" name="titulo" th:field="*{titulo}" required>
+            </div>
+            <div class="form-group">
+                <label for="tipoCritica">Crítica sobre:</label>
+                <select id="tipoCritica" name="tipoCritica" th:field="*{tipoCritica}" required>
+                    <option value="">Selecione o que você quer criticar</option>
+                    <option value="Livro">Livro</option>
+                    <option value="Filme">Filme</option>
+                    <option value="Serie">Série</option>
+                    <option value="Professor">Professor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="conteudo">Conteúdo da Crítica:</label>
+                <textarea id="conteudo" name="conteudo" th:field="*{conteudo}" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn-submit-critica">Enviar Crítica</button>
+        </form>
+
+        <p class="back-link">
+            <a th:href="@{/mural}">Voltar para o Mural de Críticas</a>
+        </p>
+    </div>
+
+    <script>
+        // Referências aos elementos HTML
+        const apiSearchInput = document.getElementById('apiSearchInput');
+        const searchApiBtn = document.getElementById('searchApiBtn');
+        const searchResultsDiv = document.getElementById('searchResults');
+        const criticaTituloInput = document.getElementById('titulo');
+        const criticaConteudoInput = document.getElementById('conteudo');
+        const criticaTipoSelect = document.getElementById('tipoCritica');
+
+        // Event Listener para o botão de busca da API
+        searchApiBtn.addEventListener('click', async () => {
+            const query = apiSearchInput.value.trim(); // Pega o texto digitado e remove espaços extras
+            
+            // Validação básica para evitar buscas muito curtas
+            if (query.length < 3) {
+                searchResultsDiv.innerHTML = '<p style="padding: 10px; color: #777;">Digite pelo menos 3 caracteres para buscar.</p>';
+                return;
+            }
+
+            searchResultsDiv.innerHTML = '<p style="padding: 10px; color: #777;">Buscando...</p>'; // Mensagem de carregamento
+
+            try {
+                // Faz a requisição AJAX (assíncrona) para o seu endpoint Spring Boot
+                // que, por sua vez, chamará a API da TMDb.
+                const response = await fetch(`/api/tmdb/search?query=${encodeURIComponent(query)}`);
+                
+                // Verifica se a resposta HTTP foi bem-sucedida (status 200-299)
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP! status: ${response.status}`);
+                }
+                const results = await response.json(); // Converte a resposta JSON em um objeto JavaScript
+
+                searchResultsDiv.innerHTML = ''; // Limpa os resultados anteriores da busca
+
+                // Se nenhum resultado for encontrado
+                if (results.length === 0) {
+                    searchResultsDiv.innerHTML = '<p style="padding: 10px; color: #777;">Nenhum resultado encontrado.</p>';
+                    return;
+                }
+
+                // Itera sobre cada item de resultado e cria um elemento HTML para ele
+                results.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('search-result-item');
+                    // Armazena dados importantes no dataset do elemento para fácil acesso no clique
+                    itemDiv.dataset.title = item.displayTitle; 
+                    itemDiv.dataset.overview = item.overview || 'Nenhuma sinopse disponível.';
+                    itemDiv.dataset.mediaType = item.mediaType;
+                    
+                    // Constrói a URL do pôster ou usa um placeholder se não houver pôster
+                    const posterUrl = item.posterPath ? `https://image.tmdb.org/t/p/w92${item.posterPath}` : 'https://via.placeholder.com/50x75?text=Sem+Poster';
+
+                    // Insere o HTML do item de resultado
+                    itemDiv.innerHTML = `
+                        <img src="${posterUrl}" alt="Poster de ${item.displayTitle}">
+                        <div class="details">
+                            <h4>${item.displayTitle} (${item.releaseDate ? item.releaseDate.substring(0, 4) : (item.firstAirDate ? item.firstAirDate.substring(0, 4) : 'N/A')})</h4>
+                            <p>${item.overview ? item.overview.substring(0, 80) + '...' : 'N/A'}</p>
+                        </div>
+                    `;
+
+                    // Adiciona um evento de clique a cada item de resultado
+                    itemDiv.addEventListener('click', () => {
+                        // Preenche os campos do formulário de crítica com os dados do item selecionado
+                        criticaTituloInput.value = itemDiv.dataset.title;
+                        criticaConteudoInput.value = itemDiv.dataset.overview;
+                        
+                        // Define o tipo de crítica com base no tipo de mídia da API (Filme ou Série)
+                        if (itemDiv.dataset.mediaType === 'movie') {
+                            criticaTipoSelect.value = 'Filme';
+                        } else if (itemDiv.dataset.mediaType === 'tv') {
+                            criticaTipoSelect.value = 'Serie';
+                        } else {
+                            criticaTipoSelect.value = ''; // Reseta se não for filme/série/livro
+                        }
+                        
+                        searchResultsDiv.innerHTML = ''; // Limpa os resultados da busca após a seleção
+                        apiSearchInput.value = ''; // Limpa o campo de busca
+                    });
+                    searchResultsDiv.appendChild(itemDiv); // Adiciona o item à div de resultados
+                });
+
+            } catch (error) {
+                console.error("Erro ao buscar filmes/séries:", error);
+                searchResultsDiv.innerHTML = '<p style="padding: 10px; color: red;">Erro ao buscar. Tente novamente.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

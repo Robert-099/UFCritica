@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFCritica - Mural de Críticas</title>
+    <style>
+        /* Estilos base do corpo da página */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column; /* Para alinhar o cabeçalho e o mural */
+            align-items: center; /* Centraliza horizontalmente */
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px; /* Padding geral para o corpo */
+        }
+
+        /* Estilos do cabeçalho do mural */
+        .mural-header {
+            width: 80%; /* Largura do cabeçalho */
+            max-width: 800px; /* Largura máxima para telas grandes */
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .mural-header h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .mural-actions {
+            margin-top: 20px;
+        }
+        .btn-add-critica {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-add-critica:hover {
+            background-color: #218838;
+        }
+
+        /* Estilos da lista de críticas */
+        .critica-list {
+            width: 80%; /* Largura da lista de críticas */
+            max-width: 800px; /* Largura máxima */
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Espaçamento entre as críticas */
+        }
+        .critica-item {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: left;
+            position: relative; /* Para o posicionamento das estrelas */
+        }
+        .critica-item h3 {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .critica-item p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .critica-info {
+            font-size: 0.85em;
+            color: #777;
+            border-top: 1px solid #eee; /* Linha divisória */
+            padding-top: 10px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between; /* Espaça os elementos */
+            align-items: center; /* Alinha verticalmente no centro */
+            flex-wrap: wrap; /* Permite que os elementos quebrem linha em telas menores */
+        }
+        .critica-info span {
+            margin-right: 15px;
+            margin-bottom: 5px; /* Espaçamento para elementos que quebram linha */
+        }
+        .no-criticas {
+            text-align: center;
+            color: #777;
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+        .home-link {
+            margin-top: 40px;
+            font-size: 1em;
+        }
+        .home-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .home-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- ESTILOS PARA AVALIAÇÃO COM ESTRELAS --- */
+        /* Estilos para a exibição da média de estrelas */
+        .rating-display {
+            font-size: 1.2em; /* Tamanho das estrelas no display */
+            color: #f39c12; /* Cor das estrelas (laranja/ouro) */
+            white-space: nowrap; /* Impede que as estrelas e o texto quebrem linha */
+            display: flex; /* Para alinhar estrelas e texto de votos */
+            align-items: center;
+            margin-left: auto; /* Empurra para a direita no flexbox */
+        }
+        .rating-display .filled {
+            color: #f1c40f; /* Cor mais forte para estrelas preenchidas */
+        }
+        .rating-display .empty {
+            color: #ccc; /* Cor para estrelas vazias */
+        }
+        .rating-text {
+            font-size: 0.8em;
+            color: #777;
+            margin-left: 5px;
+        }
+
+        /* Área de votação (estrelas clicáveis) */
+        .rating-interaction {
+            text-align: right; /* Alinha o texto e as estrelas de votação à direita */
+            margin-top: 10px;
+            display: flex; /* Para alinhar texto "Avalie esta crítica" e as estrelas */
+            justify-content: flex-end; /* Alinha ao final */
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px; /* Espaçamento entre os elementos da linha de interação */
+        }
+
+        .rating-stars {
+            display: inline-block;
+            direction: rtl; /* Inverte a ordem para que 5 estrelas esteja à esquerda */
+        }
+        .rating-stars input[type="radio"] {
+            display: none; /* Esconde os radio buttons nativos */
+        }
+        .rating-stars label {
+            font-size: 1.5em; /* Tamanho das estrelas para votar */
+            color: #ccc; /* Cor padrão das estrelas vazias */
+            cursor: pointer;
+            padding: 0 2px;
+            transition: color 0.2s; /* Transição de cor suave */
+        }
+        /* Efeito hover: quando o mouse passa sobre uma estrela, ela e as anteriores (à direita) mudam de cor */
+        .rating-stars label:hover,
+        .rating-stars label:hover ~ label {
+            color: #f39c12; /* Cor ao passar o mouse */
+        }
+        /* Estrelas preenchidas quando um radio button é selecionado */
+        .rating-stars input[type="radio"]:checked ~ label {
+            color: #f1c40f; /* Cor das estrelas preenchidas ao selecionar */
+        }
+    </style>
+</head>
+<body>
+    <div class="mural-header">
+        <h2>Mural de Críticas UFcríticas</h2>
+        <p>Veja e divugue sua opniao</p>
+        <div class="mural-actions">
+            <a th:href="@{/add-critica}" class="btn-add-critica">Adicionar Nova Crítica</a>
+        </div>
+    </div>
+
+    <div class="critica-list">
+        <div th:if="${successMessage}" style="color: green; background-color: #e6ffe6; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(criticas)}" class="no-criticas">
+            <p>Nenhuma crítica ainda. Seja o primeiro a adicionar uma!</p>
+        </div>
+
+        <div th:each="critica : ${criticas}" class="critica-item">
+            <h3 th:text="${critica.titulo}">Título da Crítica de Exemplo</h3>
+            <p th:text="${critica.conteudo}">Conteúdo da crítica de exemplo. Aqui vai o texto detalhado da crítica enviada pelo usuário, podendo ser longo e expressar diversas opiniões e pontos de vista.</p>
+            
+            <div class="critica-info">
+                <div>
+                    <span th:text="|Tipo: ${critica.tipoCritica}|">Tipo: Professor</span>
+                    <span th:text="|Postado por: ${critica.autor}|">Postado por: Usuário Anônimo</span>
+                    <span th:text="|Em: ${critica.dataPostagem}|">Em: 14/06/2025</span>
+                </div>
+
+                <div class="rating-display">
+                    <span th:each="i : ${#numbers.sequence(1, 5)}" th:classappend="${critica.mediaAvaliacao >= i ? 'filled' : 'empty'}">&#9733;</span> <span class="rating-text" th:text="${#numbers.formatDecimal(critica.mediaAvaliacao, 0, 1) + ' (' + critica.totalAvaliacoes + ' votos)'}">4.5 (10 votos)</span>
+                </div>
+            </div>
+
+            <div class="rating-interaction">
+                <span style="font-size: 0.9em; color: #666;">Avalie esta crítica:</span>
+                <div class="rating-stars" th:data-critica-id="${critica.id}">
+                    <input type="radio" th:id="${'star5-' + critica.id}" th:name="${'rating-' + critica.id}" value="5" />
+                    <label th:for="${'star5-' + critica.id}">&#9733;</label>
+                    <input type="radio" th:id="${'star4-' + critica.id}" th:name="${'rating-' + critica.id}" value="4" />
+                    <label th:for="${'star4-' + critica.id}">&#9733;</label>
+                    <input type="radio" th:id="${'star3-' + critica.id}" th:name="${'rating-' + critica.id}" value="3" />
+                    <label th:for="${'star3-' + critica.id}">&#9733;</label>
+                    <input type="radio" th:id="${'star2-' + critica.id}" th:name="${'rating-' + critica.id}" value="2" />
+                    <label th:for="${'star2-' + critica.id}">&#9733;</label>
+                    <input type="radio" th:id="${'star1-' + critica.id}" th:name="${'rating-' + critica.id}" value="1" />
+                    <label th:for="${'star1-' + critica.id}">&#9733;</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="critica-item" th:unless="${criticas}">
+            <h3>Livro: A Revolução dos Bichos - Uma Fábula Atemporal</h3>
+            <p>A crítica social de Orwell neste livro é simplesmente genial. Uma leitura obrigatória para entender a dinâmica do poder e a natureza humana.</p>
+            <div class="critica-info">
+                <span>Tipo: Livro</span>
+                <span>Postado por: Leitor Crítico</span>
+                <span>Em: 01/05/2025</span>
+                <div class="rating-display">
+                    <span class="filled">&#9733;</span><span class="filled">&#9733;</span><span class="filled">&#9733;</span><span class="filled">&#9733;</span><span class="filled">&#9733;</span>
+                    <span class="rating-text">5.0 (5 votos)</span>
+                </div>
+            </div>
+            <div class="rating-interaction" style="text-align: right; margin-top: 10px;">
+                <span style="font-size: 0.9em; color: #666;">Avalie esta crítica:</span>
+                <div class="rating-stars" data-critica-id="static-critica-livro">
+                    <input type="radio" id="static-star5-livro" name="static-rating-livro" value="5" /><label for="static-star5-livro">&#9733;</label>
+                    <input type="radio" id="static-star4-livro" name="static-rating-livro" value="4" /><label for="static-star4-livro">&#9733;</label>
+                    <input type="radio" id="static-star3-livro" name="static-rating-livro" value="3" /><label for="static-star3-livro">&#9733;</label>
+                    <input type="radio" id="static-star2-livro" name="static-rating-livro" value="2" /><label for="static-star2-livro">&#9733;</label>
+                    <input type="radio" id="static-star1-livro" name="static-rating-livro" value="1" /><label for="static-star1-livro">&#9733;</label>
+                </div>
+            </div>
+        </div>
+        <div class="critica-item" th:unless="${criticas}">
+            <h3>Série: Stranger Things 4 - Temporada Impecável!</h3>
+            <p>A quarta temporada de Stranger Things elevou o nível da série a outro patamar. Visualmente deslumbrante, roteiro envolvente e atuações incríveis. Fiquei chocado com o final!</p>
+            <div class="critica-info">
+                <span>Tipo: Serie</span>
+                <span>Postado por: Viciado em Netflix</span>
+                <span>Em: 20/05/2025</span>
+                <div class="rating-display">
+                    <span class="filled">&#9733;</span><span class="filled">&#9733;</span><span class="filled">&#9733;</span><span class="filled">&#9733;</span><span class="empty">&#9733;</span>
+                    <span class="rating-text">4.0 (8 votos)</span>
+                </div>
+            </div>
+            <div class="rating-interaction" style="text-align: right; margin-top: 10px;">
+                <span style="font-size: 0.9em; color: #666;">Avalie esta crítica:</span>
+                <div class="rating-stars" data-critica-id="static-critica-serie">
+                    <input type="radio" id="static-star5-serie" name="static-rating-serie" value="5" /><label for="static-star5-serie">&#9733;</label>
+                    <input type="radio" id="static-star4-serie" name="static-rating-serie" value="4" /><label for="static-star4-serie">&#9733;</label>
+                    <input type="radio" id="static-star3-serie" name="static-rating-serie" value="3" /><label for="static-star3-serie">&#9733;</label>
+                    <input type="radio" id="static-star2-serie" name="static-rating-serie" value="2" /><label for="static-star2-serie">&#9733;</label>
+                    <input type="radio" id="static-star1-serie" name="static-rating-serie" value="1" /><label for="static-star1-serie">&#9733;</label>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <p class="home-link">
+        <a th:href="@{/}">Voltar para a Página Inicial</a>
+    </p>
+
+    <script>
+        // Função assíncrona para enviar a avaliação via requisição AJAX (fetch API)
+        async function submitRating(criticaId, ratingValue) {
+            try {
+                // Faz uma requisição POST para o endpoint no seu Spring Boot
+                const response = await fetch(`/api/criticas/${criticaId}/avaliar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Informa que o corpo da requisição é JSON
+                    },
+                    body: JSON.stringify({ rating: ratingValue }) // Converte o objeto { rating: valor } para JSON
+                });
+
+                // Verifica se a resposta foi bem-sucedida (status 2xx)
+                if (response.ok) {
+                    const updatedCritica = await response.json(); // Pega o JSON da crítica atualizada do backend
+                    // Chama a função para atualizar o display visual das estrelas na página
+                    updateCriticaRatingDisplay(criticaId, updatedCritica.mediaAvaliacao, updatedCritica.totalAvaliacoes);
+                    console.log(`Crítica ${criticaId} avaliada com ${ratingValue} estrelas. Nova média: ${updatedCritica.mediaAvaliacao}`);
+                } else {
+                    // Se houver um erro na resposta do servidor (ex: 404, 500)
+                    const errorData = await response.json(); // Tenta pegar a mensagem de erro do JSON
+                    alert('Erro ao avaliar crítica: ' + (errorData.message || 'Erro desconhecido.'));
+                    console.error('Erro ao avaliar:', errorData);
+                }
+            } catch (error) {
+                // Captura erros de rede ou outros erros no processo de fetch
+                console.error('Erro de rede ou ao processar avaliação:', error);
+                alert('Não foi possível avaliar a crítica. Verifique sua conexão.');
+            }
+        }
+
+        // Função para atualizar o display visual das estrelas na interface do usuário
+        function updateCriticaRatingDisplay(criticaId, newMediaAvaliacao, newTotalAvaliacoes) {
+            // Encontra o elemento 'critica-item' que contém o grupo de estrelas avaliado
+            // Usa querySelector para encontrar o elemento 'rating-stars' com o ID da crítica,
+            // e depois .closest() para subir até o 'critica-item' pai.
+            const criticaItem = document.querySelector(`.critica-item .rating-stars[data-critica-id="${criticaId}"]`).closest('.critica-item');
+            if (!criticaItem) return; // Sai se não encontrar o item (prevenção de erro)
+
+            const ratingDisplay = criticaItem.querySelector('.rating-display'); // Encontra o div que exibe as estrelas
+            if (ratingDisplay) {
+                let starsHtml = '';
+                // Gera o HTML das 5 estrelas (preenchidas ou vazias)
+                for (let i = 1; i <= 5; i++) {
+                    starsHtml += `<span class="${newMediaAvaliacao >= i ? 'filled' : 'empty'}">&#9733;</span>`;
+                }
+                // Atualiza o conteúdo HTML do display de estrelas
+                ratingDisplay.innerHTML = `${starsHtml} <span class="rating-text">${newMediaAvaliacao.toFixed(1)} (${newTotalAvaliacoes} votos)</span>`;
+            }
+        }
+
+        // Adiciona ouvintes de evento 'change' a todos os radio buttons de avaliação
+        // O 'change' é disparado quando o valor de um radio button muda (i.e., quando é selecionado)
+        document.querySelectorAll('.rating-stars input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                // Pega o ID da crítica do atributo data-critica-id do elemento pai (div.rating-stars)
+                const criticaId = event.target.closest('.rating-stars').dataset.criticaId;
+                // Pega o valor da estrela selecionada (1 a 5) e converte para número inteiro
+                const ratingValue = parseInt(event.target.value);
+                
+                // Valida se o ID e o valor são válidos antes de enviar
+                if (criticaId && !isNaN(ratingValue)) {
+                    submitRating(criticaId, ratingValue);
+                }
+            });
+        });
+
+        // Opcional: Lidar com a mensagem de sucesso que vem do redirecionamento
+        // (Ex: após adicionar uma nova crítica, o '/mural?successMessage=...')
+        const urlParams = new URLSearchParams(window.location.search); // Pega os parâmetros da URL
+        const successMessageFromUrl = urlParams.get('successMessage'); // Tenta obter o parâmetro 'successMessage'
+        if (successMessageFromUrl) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = "color: green; background-color: #e6ffe6; padding: 10px; border-radius: 5px; margin-bottom: 20px;";
+            successDiv.textContent = decodeURIComponent(successMessageFromUrl); // Decodifica para exibir corretamente
+            document.querySelector('.critica-list').prepend(successDiv); // Adiciona a mensagem no topo da lista
+            // Limpa a URL para evitar que a mensagem reapareça ao recarregar a página
+            history.replaceState({}, document.title, window.location.pathname);
+        }
+    </script>
+</body>
+</html>
